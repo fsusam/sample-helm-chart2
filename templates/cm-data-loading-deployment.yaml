@@ -1,0 +1,68 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "cm-data-loading-service-enm.cmDataLoading.fullname" . }}
+  labels:
+    app: {{ template "cm-data-loading-service-enm.name" . }}
+    chart: {{ template "cm-data-loading-service-enm.chart" . }}
+    component: {{ .Values.cmDataLoading.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "cm-data-loading-service-enm.name" . }}
+      release: {{ .Release.Name }}
+  {{- if .Values.cmDataLoading.strategy }}
+  strategy:
+  {{ toYaml .Values.cmDataLoading.strategy | indent 4 }}
+  {{- end }}
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      {{- if .Values.cmDataLoading.annotations }}
+      annotations:
+      {{ toYaml .Values.cmDataLoading.annotations | indent 8 }}
+      {{- end }}
+      labels:
+        app: {{ template "cm-data-loading-service-enm.name" . }}
+        component: {{ .Values.cmDataLoading.name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ template "cm-data-loading-service-enm.name" . }}-{{ .Values.cmDataLoading.name }}
+          image: "{{ template "cm-data-loading-service-enm.registry" . }}/{{ .Values.imageCredentials.repoPath }}/{{ .Values.images.cmDataLoading.name }}:{{ .Values.images.cmDataLoading.tag }}"
+          imagePullPolicy: "{{ .Values.imageCredentials.pullPolicy }}"
+          env:
+          - name: JAVA_OPTS
+            value: {{ .Values.cmDataLoading.javaOpts | quote }}
+          - name: cm-data-loading-service-enm.cmExportJobTimeoutUnit
+            value: {{ .Values.cmDataLoading.cmExportJobTimeoutUnit | quote }}
+          - name: cm-data-loading-service-enm.cmExportJobTimeoutValue
+            value: {{ .Values.cmDataLoading.cmExportJobTimeoutValue | quote }}
+          - name: cm-data-loading-service-enm.cmExportDelayUnit
+            value: {{ .Values.cmDataLoading.cmExportDelayUnit | quote }}
+          - name: cm-data-loading-service-enm.cmExportDelayValue
+            value: {{ .Values.cmDataLoading.cmExportDelayValue | quote }}
+          - name: cm-data-loading-service-enm.cmSchedulerTimeoutUnit
+            value: {{ .Values.cmDataLoading.cmSchedulerTimeoutUnit | quote }}
+          - name: cm-data-loading-service-enm.cmSchedulerTimeoutValue
+            value: {{ .Values.cmDataLoading.cmSchedulerTimeoutValue | quote }}
+          - name: cm-data-loading-service-enm.cmExportMaxRetries
+            value: {{ .Values.cmDataLoading.cmExportMaxRetries | quote }}
+          ports:
+          - name: jboss-default
+            containerPort: 8080
+            protocol: TCP
+          - name: jboss-admin-1
+            containerPort: 9990
+            protocol: TCP
+          - name: jboss-admin-2
+            containerPort: 9999
+            protocol: TCP
+          - name: jboss-debug
+            containerPort: 8787
+            protocol: TCP

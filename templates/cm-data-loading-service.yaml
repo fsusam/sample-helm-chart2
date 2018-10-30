@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "cm-data-loading-service-enm.name" . }}
+  labels:
+    app: {{ template "cm-data-loading-service-enm.name" . }}
+    chart: {{ template "cm-data-loading-service-enm.chart" . }}
+    component: {{ .Values.cmDataLoading.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  {{- if .Values.cmDataLoading.service.ClusterIP }}
+  clusterIP: {{ .Values.cmDataLoading.service.ClusterIP }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.cmDataLoading.service.jboss.port }}
+      targetPort: jboss-default
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "cm-data-loading-service-enm.name" . }}
+    release: {{ .Release.Name }}

@@ -1,0 +1,66 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "cm-data-loading-service-enm.cmDataTransformer.fullname" . }}
+  labels:
+    app: {{ template "cm-data-loading-service-enm.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: {{ .Values.cmDataTransformer.name }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "cm-data-loading-service-enm.name" . }}
+      release: {{ .Release.Name }}
+  strategy:
+    type: {{ .Values.cmDataTransformer.strategy }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "cm-data-loading-service-enm.name" . }}
+        component: {{ .Values.cmDataTransformer.name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ template "cm-data-loading-service-enm.name" . }}-{{ .Values.cmDataTransformer.name }}
+        image: "{{ template "cm-data-loading-service-enm.registry" . }}/{{ .Values.imageCredentials.repoPath }}/{{ .Values.images.cmDataTransformer.name }}:{{ .Values.images.cmDataTransformer.tag }}"
+        imagePullPolicy: "{{ .Values.imageCredentials.pullPolicy }}"
+        env:
+        - name: JAVA_OPTS
+          value: {{ .Values.cmDataTransformer.javaOpts | quote }}
+        - name: cm-transformer-enm-dynamic-reader.spark-driver-memory
+          value: {{ .Values.cmDataTransformer.sparkDriverMemory | quote }}
+        - name: cm-transformer-enm-dynamic-reader.spark-executor-memory
+          value: {{ .Values.cmDataTransformer.sparkExecutorMemory | quote }}
+        - name: ALGORITHM_SERVICE_HOSTNAME
+          value: {{ .Values.cmDataTransformer.algorithmService.hostname | quote }}
+        - name: ALGORITHM_SERVICE_PORT
+          value: {{ .Values.cmDataTransformer.algorithmService.port | quote }}
+        - name: CM_SERVICE_HOSTNAME
+          value: {{ .Values.cmDataTransformer.cmService.hostname | quote }}
+        - name: CM_SERVICE_PORT
+          value: {{ .Values.cmDataTransformer.cmService.port | quote }}
+        - name: CM_TRANSFORMER_SPARK_MASTER_HOSTNAME
+          value: {{ .Values.cmDataTransformer.sparkMaster.hostname | quote }}
+        - name: CM_TRANSFORMER_SPARK_MASTER_PORT
+          value: {{ .Values.cmDataTransformer.sparkMaster.port | quote }}
+        - name: OSS_REPOSITORY_SERVICE_HOSTNAME
+          value: {{ .Values.cmDataTransformer.ossRepositoryService.hostname | quote }}
+        - name: OSS_REPOSITORY_SERVICE_PORT
+          value: {{ .Values.cmDataTransformer.ossRepositoryService.port | quote }}
+        ports:
+        - name: jboss-default
+          containerPort: 8080
+          protocol: TCP
+        - name: jboss-debug
+          containerPort: 8787
+          protocol: TCP
+        - name: jboss-admin-1
+          containerPort: 9990
+          protocol: TCP
+        - name: jboss-admin-2
+          containerPort: 9999
+          protocol: TCP

@@ -1,0 +1,72 @@
+---
+global:
+  registry:
+    url: "armdocker.rnd.ericsson.se"
+
+imageCredentials:
+  repoPath: "proj-eson"
+  pullPolicy: IfNotPresent
+  registry:
+    url:
+
+images:
+  cmDataLoading:
+    name: cm-data-loading-service-enm
+    tag: <VERSION_PREFIX>-<BUILD_NUMBER>
+  cmDataTransformer:
+    name: cm-transformer-enm-dynamic-reader
+    tag: latest
+
+cmDataLoading:
+  name: cm-data-loading
+  javaOpts: -Xms512m -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=768m
+  cmExportJobTimeoutUnit: MINUTES
+  cmExportJobTimeoutValue: 30
+  cmExportDelayUnit: SECONDS
+  cmExportDelayValue: 30
+  cmSchedulerTimeoutUnit: SECONDS
+  cmSchedulerTimeoutValue: 15
+  cmExportMaxRetries: 5
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ''
+    externalIPs: []
+    loadBalancerIP: ''
+    loadBalancerSourceRanges: []
+    nodePort: 0
+    servicePort: 8080
+    type: ClusterIP
+    jboss:
+      port: 80
+  ossRepositoryService:
+    hostname: oss-repository-service
+    port: 8080
+
+cmDataTransformer:
+  name: cm-data-transformer
+  javaOpts: -Xms512m -Xmx2g -XX:PermSize=256m -XX:MaxPermSize=768m
+  sparkDriverMemory: 2g
+  sparkExecutorMemory: 2g
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ''
+    externalIPs: []
+    loadBalancerIP: ''
+    loadBalancerSourceRanges: []
+    nodePort: 0
+    servicePort: 8080
+    type: ClusterIP
+  algorithmService:
+    hostname: algorithm-service
+    port: 8080
+  cmService:
+    hostname: cm-service
+    port: 8080
+  sparkMaster:
+    hostname: spark-master
+    port: 7077
+  ossRepositoryService:
+    hostname: oss-repository-service
+    port: 8080
